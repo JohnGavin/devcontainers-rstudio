@@ -3,6 +3,11 @@ ARG VARIANT="4.2"
 FROM rocker/tidyverse:${VARIANT}
 # Includes packages: devtools tidyverse tidymodels glmnet randomForest xgboost 
 
+# RUN useradd -m -p rstudio rstudio
+# RUN useradd -p rstudio rstudio
+RUN echo 'rstudio:rstudio' | chpasswd
+# RUN echo 'Docker!' | passwd --stdin root 
+
 # Use the [Option] comment to specify true/false arguments that should appear in VS Code UX
 #
 # [Option] Install zsh
@@ -11,14 +16,34 @@ ARG INSTALL_ZSH="true"
 ARG UPGRADE_PACKAGES="false"
 
 # Install needed packages and setup non-root user. Use a separate RUN statement to add your own dependencies.
-ARG USERNAME=vscode
+ARG USERNAME=rstudio
 ARG USER_UID=1001
 ARG USER_GID=$USER_UID
+USER $USER_UID:$USER_GID
+
+# RUN addgroup --system staff
+# RUN adduser --system rstudio --ingroup staff
+# RUN usermod -aG sudo ${USERNAME} 
+# RUN sudo gpasswd -a ${USERNAME} sudo
+# RUN sudo usermod -aG staff ${USERNAME} 
+# sudo adduser <username> sudo
+#RUN apt update -y \
+#    && apt install -y --no-install-recommends \
+#    sudo 
+    # && adduser --disabled-password --gecos "" --uid 1000 ${USERNAME} \
+
+# USER ${USERNAME}
+# USER rstudio:staff
+
+#RUN sudo usermod -u 1001 runner
+#RUN sudo groupmod -g 121 runner
 COPY library-scripts/*.sh /tmp/library-scripts/
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && /bin/bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" "true" "true" \
-    && usermod -a -G staff ${USERNAME} \
-    && apt-get -y install \
+USER root
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive 
+RUN /bin/bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" "true" "true" 
+#RUN apt-get update && export DEBIAN_FRONTEND=noninteractive 
+#RUN sudo /bin/bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" "true" "true" 
+RUN apt-get -y install \
         python3-pip \
         libgit2-dev \
         libcurl4-openssl-dev \
@@ -49,27 +74,32 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         statip \
         #patchwork \
         #paletteer \
-        here \
+        #here \
         #doParallel \
-        janitor \
+        #janitor \
         #vip \
         #ranger \
-        palmerpenguins \
-        skimr \
+        #palmerpenguins \
+        #skimr \
         #nnet \
         #kernlab \
         #plotly \
         #factoextra \
         #cluster \
-        tidymodels \
-        markdown \ 
+        #tidymodels \
+        #markdown \ 
         #ottr \
     && rm -rf /tmp/downloaded_packages
+
+#RUN groupadd docker 
+# RUN usermod -aG sudo ${USERNAME} 
+#RUN usermod -aG docker ${USERNAME} 
+RUN echo "%sudo   ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers
 
 ## Install summarytools and load some R package off the bat
 RUN R -e "devtools::install_github('https://github.com/dcomtois/summarytools/tree/0-8-9')"
 #RUN R -e "library(ottr)"
-RUN R -e "library(here)"
+#RUN R -e "library(here)"
 RUN R -e "library(languageserver)"
 # RUN installGithub.r ucbds-infra/ottr@stable
 
@@ -100,10 +130,23 @@ RUN apt-get update \
     && python3 -m pip --no-cache-dir install jupyter \
     && R --vanilla -s -e 'IRkernel::installspec(user = FALSE)'
 
+
 # Expose Rstudio port. Log in with rstudio/rstudio
 EXPOSE 8787
+USER rstudio
+# ENV EDITOR_FOCUS_DIR "/workspaces/devcontainers-rstudio"
+#        useradd -m $USER -u $USERID
+#        && mkdir -p /home/$USER \
+#        && chown -R $USER /home/$USER \
+#        && chown -R ${USER}:staff /home/$USER
+
+# RUN mkdir -p "$EDITOR_FOCUS_DIR"
+# RUN docker run --rm -p 8787:8787 -w $EDITOR_FOCUS_DIR -e USER=vscode -e PASSWORD=vscode rocker/verse
+
 
 # Expose Jupyter port
 EXPOSE 8888
 
 CMD ["/init"]
+
+# USER $USER_UID:$USER_GID

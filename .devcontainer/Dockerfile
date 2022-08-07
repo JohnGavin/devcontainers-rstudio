@@ -133,7 +133,7 @@ RUN apt-get update \
 
 # Expose Rstudio port. Log in with rstudio/rstudio
 EXPOSE 8787
-USER rstudio
+# USER rstudio
 # ENV EDITOR_FOCUS_DIR "/workspaces/devcontainers-rstudio"
 #        useradd -m $USER -u $USERID
 #        && mkdir -p /home/$USER \

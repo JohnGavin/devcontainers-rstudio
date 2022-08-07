@@ -31,44 +31,44 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && pip --disable-pip-version-check --no-cache-dir install pylint \
     && pip --disable-pip-version-check --no-cache-dir install jupyter \
     && pip --disable-pip-version-check --no-cache-dir install datascience \
-    && pip --disable-pip-version-check --no-cache-dir install otter-grader \
+    #&& pip --disable-pip-version-check --no-cache-dir install otter-grader \
     && pip --disable-pip-version-check --no-cache-dir install numpy \
     && pip --disable-pip-version-check --no-cache-dir install pandas \
     && pip --disable-pip-version-check --no-cache-dir install scipy \
-    && pip --disable-pip-version-check --no-cache-dir install folium>=0.9.1 \
+    #&& pip --disable-pip-version-check --no-cache-dir install folium>=0.9.1 \
     && pip --disable-pip-version-check --no-cache-dir install matplotlib \
     && pip --disable-pip-version-check --no-cache-dir install ipywidgets>=7.0.0 \
     && pip --disable-pip-version-check --no-cache-dir install bqplot \
     && pip --disable-pip-version-check --no-cache-dir install nbinteract>=0.0.12 \
-    && pip --disable-pip-version-check --no-cache-dir install otter-grader \
-    && pip --disable-pip-version-check --no-cache-dir install okpy \
+    #&& pip --disable-pip-version-check --no-cache-dir install otter-grader \
+    #&& pip --disable-pip-version-check --no-cache-dir install okpy \
     && pip --disable-pip-version-check --no-cache-dir install scikit-learn \
     && install2.r --error --skipinstalled --ncpus -1 \
         languageserver \
         httpgd \
         statip \
-        patchwork \
-        paletteer \
+        #patchwork \
+        #paletteer \
         here \
-        doParallel \
+        #doParallel \
         janitor \
-        vip \
-        ranger \
+        #vip \
+        #ranger \
         palmerpenguins \
         skimr \
-        nnet \
-        kernlab \
-        plotly \
-        factoextra \
-        cluster \
+        #nnet \
+        #kernlab \
+        #plotly \
+        #factoextra \
+        #cluster \
         tidymodels \
         markdown \ 
-        ottr \
+        #ottr \
     && rm -rf /tmp/downloaded_packages
 
 ## Install summarytools and load some R package off the bat
 RUN R -e "devtools::install_github('https://github.com/dcomtois/summarytools/tree/0-8-9')"
-RUN R -e "library(ottr)"
+#RUN R -e "library(ottr)"
 RUN R -e "library(here)"
 RUN R -e "library(languageserver)"
 # RUN installGithub.r ucbds-infra/ottr@stable

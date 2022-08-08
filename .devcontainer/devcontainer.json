@@ -26,6 +26,7 @@
 	"extensions": [
 		// Add Jupyter, R and Python vscode extensions
 		"REditorSupport.r",
+		//"reditorsupport.r",
 		"rdebugger.r-debugger",
 		"ms-toolsai.jupyter",
 		"ms-toolsai.jupyter-renderers",
@@ -50,12 +51,14 @@
 		}
 	},
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "sudo rstudio-server start",
-	// "postCreateCommand": "sudo rstudio-server verify-installation"
-	"postCreateCommand": "pip3 install -r requirements.txt",
-
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	//"remoteUser": "rstudio",
-	//"remote": "rstudio" 
+	"remoteUser": "rstudio",
+	//"remote": "rstudio" ,
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "sudo rstudio-server start"
+	// "postCreateCommand": "sudo rstudio-server verify-installation"
+	// "postCreateCommand": "pip3 install -r requirements.txt",
+	// "postCreateCommand": "R --version",
+
 }

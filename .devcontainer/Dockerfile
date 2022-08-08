@@ -17,9 +17,9 @@ ARG UPGRADE_PACKAGES="false"
 
 # Install needed packages and setup non-root user. Use a separate RUN statement to add your own dependencies.
 ARG USERNAME=rstudio
-ARG USER_UID=1001
+ARG USER_UID=1000
 ARG USER_GID=$USER_UID
-USER $USER_UID:$USER_GID
+# USER $USER_UID:$USER_GID
 
 # USER ${USERNAME}
 # USER rstudio:staff
@@ -28,6 +28,7 @@ USER $USER_UID:$USER_GID
 # RUN adduser --system rstudio --ingroup staff
 USER root
 RUN usermod -aG sudo ${USERNAME} 
+RUN usermod -aG staff ${USERNAME} 
 # USER $USER_UID:$USER_GID
 # RUN sudo gpasswd -a ${USERNAME} sudo
 # RUN sudo usermod -aG staff ${USERNAME} 
@@ -53,6 +54,8 @@ RUN apt-get -y install \
         libssl-dev \
         libxml2-dev \
         libxt-dev \
+        libfontconfig1-dev \
+        libcairo2-dev \
     && apt-get autoremove -y && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* /tmp/library-scripts \
     && python3 -m pip --no-cache-dir install radian \
@@ -69,18 +72,18 @@ RUN apt-get -y install \
     && pip --disable-pip-version-check --no-cache-dir install ipywidgets>=7.0.0 \
     && pip --disable-pip-version-check --no-cache-dir install bqplot \
     && pip --disable-pip-version-check --no-cache-dir install nbinteract>=0.0.12 \
-    #&& pip --disable-pip-version-check --no-cache-dir install otter-grader \
-    #&& pip --disable-pip-version-check --no-cache-dir install okpy \
+    && pip --disable-pip-version-check --no-cache-dir install okpy \
     && pip --disable-pip-version-check --no-cache-dir install scikit-learn \
     && install2.r --error --skipinstalled --ncpus -1 \
         languageserver \
+        devtools \
         httpgd \
         statip \
         #patchwork \
         #paletteer \
-        #here \
+        here \
         #doParallel \
-        #janitor \
+        janitor \
         #vip \
         #ranger \
         #palmerpenguins \
@@ -91,7 +94,7 @@ RUN apt-get -y install \
         #factoextra \
         #cluster \
         #tidymodels \
-        #markdown \ 
+        markdown \ 
         #ottr \
     && rm -rf /tmp/downloaded_packages
 
@@ -100,7 +103,7 @@ RUN apt-get -y install \
 #RUN usermod -aG docker ${USERNAME} 
 RUN echo "%sudo   ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers
 
-USER rstudio
+# USER rstudio
 
 ## Install summarytools and load some R package off the bat
 RUN R -e "devtools::install_github('https://github.com/dcomtois/summarytools/tree/0-8-9')"
@@ -118,6 +121,10 @@ RUN export TAG=$(git ls-remote --tags --refs --sort='version:refname' https://gi
 # R Session watcher settings.
 # See more details: https://github.com/REditorSupport/vscode-R/wiki/R-Session-watcher
 RUN echo 'source(file.path(Sys.getenv("HOME"), ".vscode-R", "init.R"))' >> ${HOME}/.Rprofile
+# R Session watcher settings.
+# See more details: https://github.com/REditorSupport/vscode-R/wiki/R-Session-watcher
+# RUN echo 'if (interactive() && Sys.getenv("TERM_PROGRAM") == "vscode") source(file.path(Sys.getenv("HOME"), ".vscode-R", "init.R"))' >>"${R_HOME}/etc/Rprofile.site"
+
 
 # [Optional] Uncomment this section to install additional OS packages.
 # RUN apt-get update \
@@ -129,14 +136,18 @@ RUN echo 'source(file.path(Sys.getenv("HOME"), ".vscode-R", "init.R"))' >> ${HOM
 
 
 # [Optional] Uncomment this section to install vscode-jupyter dependencies.
-USER root
+# USER root
 RUN apt-get update \
     && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends libzmq3-dev \
+    && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* \
     && install2.r --error --skipinstalled --ncpus -1 IRkernel \
+    && rm -rf /tmp/downloaded_packages \
     && python3 -m pip --no-cache-dir install jupyter \
     && R --vanilla -s -e 'IRkernel::installspec(user = FALSE)'
 USER rstudio
+
+
 
 
 # Expose Rstudio port. Log in with rstudio/rstudio
@@ -146,7 +157,6 @@ EXPOSE 8787
 #        && mkdir -p /home/$USER \
 #        && chown -R $USER /home/$USER \
 #        && chown -R ${USER}:staff /home/$USER
-
 # RUN mkdir -p "$EDITOR_FOCUS_DIR"
 # RUN docker run --rm -p 8787:8787 -w $EDITOR_FOCUS_DIR -e USER=vscode -e PASSWORD=vscode rocker/verse
 

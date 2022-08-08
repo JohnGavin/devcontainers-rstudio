@@ -21,13 +21,14 @@ ARG USER_UID=1001
 ARG USER_GID=$USER_UID
 USER $USER_UID:$USER_GID
 
-USER $USER_UID:$USER_GID
 # USER ${USERNAME}
 # USER rstudio:staff
 
 # RUN addgroup --system staff
 # RUN adduser --system rstudio --ingroup staff
+USER root
 RUN usermod -aG sudo ${USERNAME} 
+# USER $USER_UID:$USER_GID
 # RUN sudo gpasswd -a ${USERNAME} sudo
 # RUN sudo usermod -aG staff ${USERNAME} 
 # sudo adduser <username> sudo
@@ -40,9 +41,7 @@ RUN usermod -aG sudo ${USERNAME}
 
 
 
-
 COPY library-scripts/*.sh /tmp/library-scripts/
-USER root
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive 
 RUN /bin/bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" "true" "true" 
 #RUN apt-get update && export DEBIAN_FRONTEND=noninteractive 
@@ -65,7 +64,7 @@ RUN apt-get -y install \
     && pip --disable-pip-version-check --no-cache-dir install numpy \
     && pip --disable-pip-version-check --no-cache-dir install pandas \
     && pip --disable-pip-version-check --no-cache-dir install scipy \
-    #&& pip --disable-pip-version-check --no-cache-dir install folium>=0.9.1 \
+    && pip --disable-pip-version-check --no-cache-dir install folium>=0.9.1 \
     && pip --disable-pip-version-check --no-cache-dir install matplotlib \
     && pip --disable-pip-version-check --no-cache-dir install ipywidgets>=7.0.0 \
     && pip --disable-pip-version-check --no-cache-dir install bqplot \
@@ -130,12 +129,14 @@ RUN echo 'source(file.path(Sys.getenv("HOME"), ".vscode-R", "init.R"))' >> ${HOM
 
 
 # [Optional] Uncomment this section to install vscode-jupyter dependencies.
+USER root
 RUN apt-get update \
     && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends libzmq3-dev \
     && install2.r --error --skipinstalled --ncpus -1 IRkernel \
     && python3 -m pip --no-cache-dir install jupyter \
     && R --vanilla -s -e 'IRkernel::installspec(user = FALSE)'
+USER rstudio
 
 
 # Expose Rstudio port. Log in with rstudio/rstudio

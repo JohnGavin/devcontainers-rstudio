@@ -21,22 +21,26 @@ ARG USER_UID=1001
 ARG USER_GID=$USER_UID
 USER $USER_UID:$USER_GID
 
+USER $USER_UID:$USER_GID
+# USER ${USERNAME}
+# USER rstudio:staff
+
 # RUN addgroup --system staff
 # RUN adduser --system rstudio --ingroup staff
-# RUN usermod -aG sudo ${USERNAME} 
+RUN usermod -aG sudo ${USERNAME} 
 # RUN sudo gpasswd -a ${USERNAME} sudo
 # RUN sudo usermod -aG staff ${USERNAME} 
 # sudo adduser <username> sudo
+#RUN sudo usermod -u 1001 runner
+#RUN sudo groupmod -g 121 runner
 #RUN apt update -y \
 #    && apt install -y --no-install-recommends \
 #    sudo 
     # && adduser --disabled-password --gecos "" --uid 1000 ${USERNAME} \
 
-# USER ${USERNAME}
-# USER rstudio:staff
 
-#RUN sudo usermod -u 1001 runner
-#RUN sudo groupmod -g 121 runner
+
+
 COPY library-scripts/*.sh /tmp/library-scripts/
 USER root
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive 
@@ -50,7 +54,8 @@ RUN apt-get -y install \
         libssl-dev \
         libxml2-dev \
         libxt-dev \
-    && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/* /tmp/library-scripts \
+    && apt-get autoremove -y && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/* /tmp/library-scripts \
     && python3 -m pip --no-cache-dir install radian \
     && pip --disable-pip-version-check --no-cache-dir install pybryt \
     && pip --disable-pip-version-check --no-cache-dir install pylint \
@@ -96,6 +101,8 @@ RUN apt-get -y install \
 #RUN usermod -aG docker ${USERNAME} 
 RUN echo "%sudo   ALL=(ALL:ALL) NOPASSWD:ALL" > /etc/sudoers
 
+USER rstudio
+
 ## Install summarytools and load some R package off the bat
 RUN R -e "devtools::install_github('https://github.com/dcomtois/summarytools/tree/0-8-9')"
 #RUN R -e "library(ottr)"
@@ -133,7 +140,6 @@ RUN apt-get update \
 
 # Expose Rstudio port. Log in with rstudio/rstudio
 EXPOSE 8787
-# USER rstudio
 # ENV EDITOR_FOCUS_DIR "/workspaces/devcontainers-rstudio"
 #        useradd -m $USER -u $USERID
 #        && mkdir -p /home/$USER \
@@ -147,6 +153,4 @@ EXPOSE 8787
 # Expose Jupyter port
 EXPOSE 8888
 
-CMD ["/init"]
-
-# USER $USER_UID:$USER_GID
+CMD ["/init"] 

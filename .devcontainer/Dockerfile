@@ -3,10 +3,6 @@ ARG VARIANT="4.2"
 FROM rocker/tidyverse:${VARIANT}
 # Includes packages: devtools tidyverse tidymodels glmnet randomForest xgboost 
 
-# RUN useradd -m -p rstudio rstudio
-# RUN useradd -p rstudio rstudio
-RUN echo 'rstudio:rstudio' | chpasswd
-# RUN echo 'Docker!' | passwd --stdin root 
 
 # Use the [Option] comment to specify true/false arguments that should appear in VS Code UX
 #
@@ -145,10 +141,18 @@ RUN apt-get update \
     && rm -rf /tmp/downloaded_packages \
     && python3 -m pip --no-cache-dir install jupyter \
     && R --vanilla -s -e 'IRkernel::installspec(user = FALSE)'
-USER rstudio
 
+RUN usermod -aG sudo rstudio
+RUN echo 'rstudio:rstudio' | chpasswd
+RUN (echo rstudio; echo rstudio) | passwd
+RUN echo 'rstudio:rstudio' | chpasswd
+# RUN echo 'Docker!' | passwd --stdin root 
+RUN chown rstudio:rstudio -R /home/rstudio
+# RUN adduser --ingroup rstudio rstudio
+# RUN useradd -m -p rstudio rstudio
+# RUN useradd -p rstudio rstudio
 
-
+# USER rstudio
 
 # Expose Rstudio port. Log in with rstudio/rstudio
 EXPOSE 8787
